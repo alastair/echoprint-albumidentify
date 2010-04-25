@@ -35,7 +35,7 @@ def fingerprint(file):
 			frames = wav.readframes(wav.getnframes())
 			fs = []
 			for i in range(0, len(frames), 2):
-				fs.append(struct.unpack("<H", frames[i:i+2])[0]/MAGIC)
+				fs.append(struct.unpack("<h", frames[i:i+2])[0])
 			
 			print "num samples", len(fs)
 			cg = pycodegen.pycodegen(fs, 10)
