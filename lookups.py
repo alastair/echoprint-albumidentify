@@ -164,5 +164,13 @@ def search_for_release_with_artistid(artistid, query):
 	r = q.getReleases(rfilter)
 	return r
 
+def search_for_release_group_with_artistid(artistid, query):
+	""" Search for all releases with a given artist id and a query for release name"""
+
+	q = ws.Query()
+	rfilter = ws.ReleaseGroupFilter(artistId=artistid, title=query)
+	r = q.getReleaseGroups(rfilter)
+	return r
+
 if __name__ == "__main__":
 	print search_for_release_with_artistid("83d91898-7763-47d7-b03b-b92132375c47", "Dark side of the moon")
