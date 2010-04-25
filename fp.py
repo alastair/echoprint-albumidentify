@@ -30,7 +30,7 @@ def fingerprint(file):
 		outfile = decode(file)
 		if outfile is not None:
 			wav = wave.open(outfile, "rb")
-			print "numframes:",wav.getnframes()
+			print "num frames:",wav.getnframes()
 
 			frames = wav.readframes(wav.getnframes())
 			fs = []
