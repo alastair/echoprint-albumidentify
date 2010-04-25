@@ -7,9 +7,8 @@ To set up:
 
  * install ffmpeg
  * compile http://github.com/alastair/enmfp-boost-python and dump in here
- * put your echonest api key in echonestconfig.py
+ * put your echonest api key in echonestconf.py
 
 To run:
     ./identify <directory>
 
-The included pyechonest code is from http://pyechonest.googlecode.com/svn/branches/beta_pyechonest/
