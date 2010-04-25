@@ -30,7 +30,6 @@ def fingerprint(file):
 		outfile = decode(file)
 		if outfile is not None:
 			wav = wave.open(outfile, "rb")
-			print "num frames:",wav.getnframes()
 
 			frames = wav.readframes(wav.getnframes())
 			fs = []
@@ -47,7 +46,6 @@ def fingerprint(file):
 
 	finally:
 		if outfile is not None and os.path.exists(outfile):
-			print "unlinking file"
 			os.unlink(outfile)
 
 
