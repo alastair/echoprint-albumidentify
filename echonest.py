@@ -35,7 +35,26 @@ def artist_profile(artistid):
 	return _do_en_query("artist/profile", bucket="id:musicbrainz", id=artistid)
 
 def fp_lookup(codes, artist="", track=""):
-	return _do_en_query("alpha_identify_song", postdata=codes)
+	""" alpha_identify_song doesn't live in the /api/v4 namespace, so do it manually"""
+	args = {}
+        args["api_key"] = echonestconf.echonest_key
+        args["format"]="json"
+	args["match_type"]="enmfp"
+        url=urlparse.urlunparse(('http',
+                'beta.developer.echonest.com',
+                '/api/alpha_identify_song',
+                '',
+                urllib.urlencode(args),
+                ''))
+        print >> sys.stderr, "opening url",url
+        f = urllib2.Request(url, "query=%s" % codes)
+        try:
+                f = urllib2.urlopen(f)
+        except Exception, e:
+                print >> sys.stderr, e.msg
+                print >> sys.stderr, e.fp.read()
+                raise
+        return json.loads(f.read())
 
 def pp(data):
 	print json.dumps(data, indent=4)
