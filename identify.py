@@ -2,14 +2,6 @@
 
 import sys
 import os
-from pyechonest import *
-import wave
-import glob
-import pycodegen
-import subprocess
-import tempfile
-import struct
-import json
 import fp
 import echonest
 import lookups
