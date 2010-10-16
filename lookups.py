@@ -7,6 +7,7 @@ import pickle
 import os
 import memocache
 import util
+import logging
 
 AMAZON_LICENSE_KEY='1WQQTEA14HEA9AERDMG2'
 
@@ -156,6 +157,9 @@ def get_track_artist_for_track(track):
 
 	return None
 
+@memocache.memoify()
+@musicbrainz_retry()
+@delayed("musicbrainz")
 def search_for_release_with_artistid(artistid, query):
 	""" Search for all releases with a given artist id and a query for release name"""
 
@@ -164,12 +168,25 @@ def search_for_release_with_artistid(artistid, query):
 	r = q.getReleases(rfilter)
 	return r
 
+@memocache.memoify()
+@musicbrainz_retry()
+@delayed("musicbrainz")
 def search_for_release_group_with_artistid(artistid, query):
 	""" Search for all releases with a given artist id and a query for release name"""
 
 	q = ws.Query()
 	rfilter = ws.ReleaseGroupFilter(artistId=artistid, title=query)
 	r = q.getReleaseGroups(rfilter)
+	return r
+
+@memocache.memoify()
+@musicbrainz_retry()
+@delayed("musicbrainz")
+def search_for_track_with_artistid(artistid, query):
+
+	q = ws.Query()
+	tfilter = ws.TrackFilter(artistId=artistid, title=query)
+	r = q.getTracks(tfilter)
 	return r
 
 if __name__ == "__main__":

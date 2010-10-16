@@ -16,12 +16,12 @@ def _do_en_query(method, postdata=None, **kwargs):
 	args["format"]="json"
 
         url=urlparse.urlunparse(('http',
-                'beta.developer.echonest.com',
+                'developer.echonest.com',
                 '/api/v4/%s' % method,
                 '',
                 urllib.urlencode(args),
                 ''))
-	# print >> sys.stderr, "opening url",url
+	print >> sys.stderr, "opening url",url
         f = urllib2.Request(url)
         try:
                 f = urllib2.urlopen(f)
@@ -34,27 +34,11 @@ def _do_en_query(method, postdata=None, **kwargs):
 def artist_profile(artistid):
 	return _do_en_query("artist/profile", bucket="id:musicbrainz", id=artistid)
 
-def fp_lookup(codes, artist="", track=""):
-	""" alpha_identify_song doesn't live in the /api/v4 namespace, so do it manually"""
-	args = {}
-        args["api_key"] = echonestconf.echonest_key
-        args["format"]="json"
-	args["match_type"]="enmfp"
-        url=urlparse.urlunparse(('http',
-                'beta.developer.echonest.com',
-                '/api/alpha_identify_song',
-                '',
-                urllib.urlencode(args),
-                ''))
-        print >> sys.stderr, "opening url",url
-        f = urllib2.Request(url, "query=%s" % codes)
-        try:
-                f = urllib2.urlopen(f)
-        except Exception, e:
-                print >> sys.stderr, e.msg
-                print >> sys.stderr, e.fp.read()
-                raise
-        return json.loads(f.read())
+def fp_lookup(code):
+	return _do_en_query("song/identify", code=code)
+
+def track_profile(id):
+	return _do_en_query("track/profile", id=id)
 
 def pp(data):
 	print json.dumps(data, indent=4)

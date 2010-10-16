@@ -36,12 +36,9 @@ def fingerprint(file):
 			for i in range(0, len(frames), 2):
 				fs.append(struct.unpack("<h", frames[i:i+2])[0]/MAGIC)
 			
-			print "num samples", len(fs)
+			#print "num samples", len(fs)
 			cg = pycodegen.pycodegen(fs, 10)
-			codes = cg.getCodes()
-			print "num codes", len(codes)
-			codestr = " ".join([str(x) for x in codes])
-			query = json.dumps({"codes": codestr})
+			return cg.getCodeString()
 			return query
 
 	finally:
