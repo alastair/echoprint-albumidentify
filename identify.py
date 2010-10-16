@@ -8,68 +8,63 @@ import lookups
 
 supported_types = [".mp3", ".ogg", ".flac"]
 
-def mb_lookup(artistid, releasename):
-	artist_profile = echonest.artist_profile(artistid)
-	if artist_profile["response"]["artist"].get("musicbrainz", None) is not None:
-		mbid = artist_profile["response"]["artist"]["musicbrainz"].split(":")[2]
-		# print "mbid",mbid
-		releases = lookups.search_for_release_group_with_artistid(mbid, releasename)
-		for r in releases:
-			print "      * %s.html" % r.getReleaseGroup().getId()
-	#echonest.pp(artist_profile)
-
 def artist_enid_to_mbid(enid):
 	artist_profile = echonest.artist_profile(enid)
-	echonest.pp(artist_profile)
 	foreign = artist_profile["response"]["artist"]["foreign_ids"]
 	mbid = foreign[0]["foreign_id"].split(":")[2]
 	return mbid
 
-def release_check(artists, count):
-	print artists
+def release_check(artists):
 	for artist in artists.keys():
+		# mbid of this artist
 		mbid = artist_enid_to_mbid(artist)
-		print mbid
-		foo = {}
-		for track in artists[artist]:
-			mbtracks = lookups.search_for_track_with_artistid(mbid, track)
-			foo[track] = [t.getTrack().getReleases()[0].getId() for t in mbtracks]
-		echonest.pp(foo)
+		# map of each song -> all the releases it comes on
+		songtorelease = {}
+		for song in artists[artist]:
+			title = song["title"]
+			mbtracks = lookups.search_for_track_with_artistid(mbid, title)
+			trackid = song["id"]
+			songtorelease[trackid] = [[t.getTrack().getId(), t.getTrack().getReleases()[0].getId()] for t in mbtracks]
 
-		# Releases
+		# map of releases -> all songs we have on that release
 		rels = {}
-		for f in foo.keys():
-			for r in foo[f]:
-				if r in rels:
-					rels[r].append(f)
+		for f in songtorelease.keys():
+			for r in songtorelease[f]:
+				release = r[1]
+				if release in rels:
+					rels[release].append([f, r[0]])
 				else:
-					rels[r] = [f]
+					rels[release] = [[f, r[0]]]
+		#print "rels:"
+		#echonest.pp(rels)
+		return rels
 
-		echonest.pp(rels)
+def print_map(rels, filemap, count):
+	for k in rels.keys():
+		r = rels[k]
+		if len(r) == count:
+			mbrel = lookups.get_release_by_releaseid(k)
+			relname = mbrel.getTitle()
+			artistname = mbrel.getArtist().getName()
+			print "Could be release: %s, by %s (%s.html)" % (relname, artistname, k)
+			count = 1
+			for track in mbrel.getTracks():
+				filename = "(missing)"
+				for [a,b] in r:
+					if b == track.getId():
+						filename = filemap[a]
+				ext = os.path.splitext(filename)[1]
+				print "%s --> %d - %s - %s%s" % (filename, count, artistname, track.getTitle(), ext)
+				count += 1
 
 def main(dir):
 	if os.path.isfile(dir):
-		query = fp.fingerprint(dir)
-		match = echonest.fp_lookup(query)
-		echonest.pp(match)
-		id = match["response"]["songs"][0]["id"]
-		artist = match["response"]["songs"][0]["artist_id"]
-		title = match["response"]["songs"][0]["title"]
-		echonest.pp(echonest.track_profile(id))
-		echonest.pp(echonest.artist_profile(artist))
-		artist_profile = echonest.artist_profile(artist)
-		foreign = artist_profile["response"]["artist"]["foreign_ids"]
-		mbid = foreign[0]["foreign_id"].split(":")[2]
-		print "mbid",mbid
-		tracks = lookups.search_for_track_with_artistid(mbid, title)
-		print tracks
-		for t in tracks:
-			print t.getTrack().getReleases()[0].getId()
-
+		pass
 	else:
 		matches = {}
 		artists = {}
 		count = 0
+		filemap = {}
 		for f in os.listdir(dir):
 			if os.path.splitext(f)[1] not in supported_types:
 				print "skipping",f
@@ -77,16 +72,19 @@ def main(dir):
 			count +=1
 			code = fp.fingerprint(os.path.join(dir, f))
 			match = echonest.fp_lookup(code)
-			echonest.pp(match)
+			#echonest.pp(match)
 			matches[f] = match
-			for song in match["response"]["songs"]:
+			if len(match["response"]["songs"]) > 0:
+				song = match["response"]["songs"][0]
 				artist = song["artist_id"]
 				title = song["title"]
+				filemap[song["id"]] = f
 				if artist in artists:
-					artists[artist].append(title)
+					artists[artist].append(song)
 				else:
-					artists[artist] = [title]
-		release_check(artists, count)
+					artists[artist] = [song]
+		rels = release_check(artists)
+		print_map(rels, filemap, count)
 
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
