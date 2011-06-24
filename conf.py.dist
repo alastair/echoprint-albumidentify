@@ -1,0 +1,7 @@
+# Get an echonest key at http://developer.echonest.com/
+echonest_key = ""
+
+# Note that if you are submitting echoprints to echoprint.musicbrainz.org
+# then your password has been reset to mb
+mb_user = ""
+mb_pass = "mb"
