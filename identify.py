@@ -2,12 +2,14 @@
 
 import sys
 import os
-import fp
 import echonest
-import lookups
+from musicbrainz import musicbrainz
+
+musicbrainz.hostname = "echoprint.musicbrainz.org"
 
 supported_types = [".mp3", ".ogg", ".flac"]
 
+"""
 def artist_enid_to_mbid(enid):
 	artist_profile = echonest.artist_profile(enid)
 	foreign = artist_profile["response"]["artist"]["foreign_ids"]
@@ -56,35 +58,28 @@ def print_map(rels, filemap, count):
 				ext = os.path.splitext(filename)[1]
 				print "%s --> %d - %s - %s%s" % (filename, count, artistname, track.getTitle(), ext)
 				count += 1
+"""
 
 def main(dir):
-	if os.path.isfile(dir):
-		pass
-	else:
-		matches = {}
-		artists = {}
-		count = 0
-		filemap = {}
-		for f in os.listdir(dir):
-			if os.path.splitext(f)[1] not in supported_types:
-				print "skipping",f
-				continue
-			count +=1
-			code = fp.fingerprint(os.path.join(dir, f))
-			match = echonest.fp_lookup(code)
-			#echonest.pp(match)
-			matches[f] = match
-			if len(match["response"]["songs"]) > 0:
-				song = match["response"]["songs"][0]
-				artist = song["artist_id"]
-				title = song["title"]
-				filemap[song["id"]] = f
-				if artist in artists:
-					artists[artist].append(song)
-				else:
-					artists[artist] = [song]
-		rels = release_check(artists)
-		print_map(rels, filemap, count)
+    if os.path.isfile(dir):
+        pass
+    else:
+        matches = {}
+        artists = {}
+        count = 0
+        filemap = {}
+        for f in os.listdir(dir):
+            if os.path.splitext(f)[1] not in supported_types:
+                print "skipping",f
+                continue
+            count +=1
+            echoprint = echonest.fingerprint(os.path.join(dir, f))
+            if echoprint:
+                mb_rec = musicbrainz.get_recordings_by_echoprint(echoprint, ["releases"])
+                print mb_rec
+
+        #rels = release_check(artists)
+        #print_map(rels, filemap, count)
 
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
