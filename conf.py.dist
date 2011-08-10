@@ -1,7 +1,10 @@
 # Get an echonest key at http://developer.echonest.com/
 echonest_key = ""
+# You probably don't need to change this
+echonest_host = "developer.echonest.com"
 
 # Note that if you are submitting echoprints to echoprint.musicbrainz.org
 # then your password has been reset to mb
 mb_user = ""
 mb_pass = "mb"
+mb_host = "echoprint.musicbrainz.org"

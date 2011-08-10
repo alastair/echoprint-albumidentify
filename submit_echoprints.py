@@ -47,10 +47,10 @@ def get_metadata(filename):
         print "    Track has no tagged musicbrainz track id"
         return {}
 
-    songid = echonest.fingerprint(filename)
-    if songid:
-        print "    %s:%s" % (trackid, songid)
-        return {trackid:songid}
+    echoprint = echonest.fingerprint(filename)
+    if echoprint:
+        print "    %s:%s" % (trackid, echoprint)
+        return {trackid:echoprint}
     else:
         print "    Not found in echoprint"
         return {}
